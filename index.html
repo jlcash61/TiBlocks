@@ -7,9 +7,11 @@
   <meta charset="UTF-8">
     <title>TiBlocks</title>
     
-   
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
-    <script type="module" src="main.js?v=2.0.3"></script>
+    <link rel="manifest" href="manifest.json">
+    <script src="phaser.min.js"></script>
+    <script type="module" src="main.js?v=2.0.5"></script>
+    <link rel="apple-touch-icon" href="assets/tblockIcon152ios.png">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
     <style>
       
         @font-face {
@@ -33,5 +35,15 @@
     </style>
 </head>
 <body>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+      .then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+      }).catch((error) => {
+        console.log('Service Worker registration failed:', error);
+      });
+    }
+  </script>
 </body>
 </html>

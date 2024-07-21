@@ -1,0 +1,31 @@
+{
+    "name": "TiBlocks",
+    "short_name": "TiBlocks",
+    "start_url": "/TiBlocks/index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#007bff",
+    "icons": [
+      {
+        "src": "assets/favicon.png",
+        "sizes": "64x64",
+        "type": "image/png"
+      },
+      {
+        "src": "assets/tblockIcon192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "assets/tblockIcon512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+    },
+    {
+      "src": "assets/tblockIcon152ios.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    }
+    ]
+  }
+  

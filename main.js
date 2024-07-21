@@ -1,4 +1,4 @@
-import GameScene from './GameScene.js?v=2.0.3';
+import GameScene from './GameScene.js?v=2.0.5';
 
 const config = {
   type: Phaser.AUTO,
