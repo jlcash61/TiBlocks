@@ -274,7 +274,9 @@ class GameScene extends Phaser.Scene {
     }
 
     if (!this.hasValidMoves()) {
+      if(this.soundEffectsEnabled){
       this.gameoverSound.play(); // Play game over sound
+      }
       this.endGame();
     }
   }
