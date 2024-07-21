@@ -6,21 +6,49 @@ class GameScene extends Phaser.Scene {
   preload() {
     this.load.image('block', 'assets/block.png');
     this.load.image('button', 'assets/button.png'); // Load button image
+    this.load.audio('place', 'assets/sounds/place.mp3');
+    this.load.audio('complete', 'assets/sounds/complete.mp3');
+    this.load.audio('invalid', 'assets/sounds/invalid.mp3');
+    this.load.audio('gameover', 'assets/sounds/gameover.mp3');
+    this.load.audio('click', 'assets/sounds/click.mp3');
   }
 
   create() {
     // Get screen dimensions
     const { width, height } = this.scale;
 
+    this.soundEffectsEnabled = false;
+
+    this.placeSound = this.sound.add('place');
+    this.completeSound = this.sound.add('complete');
+    this.invalidSound = this.sound.add('invalid');
+    this.gameoverSound = this.sound.add('gameover');
+    this.clickSound = this.sound.add('click');
+
+        // Initialize goals
+        this.goals = [
+          { description: 'Reach 100 points', target: 100, progress: 0 },
+          { description: 'Complete 10 lines', target: 10, progress: 0 },
+          { description: 'Place 20 pieces', target: 20, progress: 0 }
+        ];
+    
+        // Create the goal display
+        this.goalText = this.add.text(width * -0.005, height * -0.1, '', {
+          fontSize: '24px',
+          color: '#ffffff'
+        }).setOrigin(0.5);
+        this.updateGoalText();
+    
+
     // Create the score display
-this.score = 0;
-const scoreStyle = {
-  fontSize: '64px',
-  color: '#007bff',
-  fontStyle: 'bold'
-};
-this.scoreText = this.add.text(width / 2, height * 0.85, '0', scoreStyle).setOrigin(0.5);
-this.scoreText.setDepth(10);  // Ensure the score text is on top
+    this.score = 0;
+    const scoreStyle = {
+      fontSize: '64px',
+      color: '#007bff',
+      fontStyle: 'bold'
+    };
+    this.scoreText = this.add.text(width / 2, height * 0.9, '0', scoreStyle).setOrigin(0.5);
+    this.scoreText.setDepth(10);  // Ensure the score text is on top
 
     // Create the game grid
     this.gridSize = { rows: 10, cols: 10 };
@@ -31,21 +59,17 @@ this.scoreText.setDepth(10);  // Ensure the score text is on top
     // Initialize pieces array
     this.pieces = [];
 
-   
+
     // Initial coordinates for drawing pieces
     this.initialPieceX = width / 2 - (this.cellSize * 5.5);
     this.initialPieceY = height * 0.7;
 
- // Try to load the saved game state
-  if (!this.loadGameState()) {
-    // Generate initial pieces if no saved state
-    this.pieces = this.generatePieces();
-    this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY);
-  }
-
-    // Generate initial Tetris pieces
-   // this.pieces = this.generatePieces();
-   // this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY);
+    // Try to load the saved game state
+    if (!this.loadGameState()) {
+      // Generate initial pieces if no saved state
+      this.pieces = this.generatePieces();
+      this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY);
+    }
 
     // Create buttons
     this.createButtons();
@@ -160,8 +184,7 @@ this.scoreText.setDepth(10);  // Ensure the score text is on top
       });
     });
     piece.setSize(shape[0].length * this.cellSize, shape.length * this.cellSize);
-   // piece.setInteractive(new Phaser.Geom.Rectangle(0, 0, piece.width, piece.height), Phaser.Geom.Rectangle.Contains);
-    piece.setInteractive(new Phaser.Geom.Rectangle(-this.cellSize, -this.cellSize, piece.width + 2 * this.cellSize, piece.height + 2 * this.cellSize), Phaser.Geom.Rectangle.Contains);
+    piece.setInteractive(new Phaser.Geom.Rectangle(-this.cellSize, -this.cellSize, piece.width + 2.5 * this.cellSize, piece.height + 4 * this.cellSize), Phaser.Geom.Rectangle.Contains);
 
     this.input.setDraggable(piece);
     piece.shape = shape;
@@ -214,28 +237,44 @@ this.scoreText.setDepth(10);  // Ensure the score text is on top
           this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY); // Use the initial coordinates
         }
 
-         // Update the score with the number of occupied blocks
-         this.score += occupiedBlocks;
-         this.scoreText.setText(this.score);
- 
+        // Update the score with the number of occupied blocks
+        this.score += occupiedBlocks;
+        this.scoreText.setText(this.score);
+
+        // Track progress towards goals
+        this.updateGoalProgress('score', this.score);
+        this.updateGoalProgress('pieces', 1);
+
 
         // Check for complete rows and columns
         this.checkCompleteLines();
 
         this.saveGameState();
 
+        if(this.soundEffectsEnabled ){
+        this.placeSound.play(); // Play placement sound
+        }
+
       } else {
         // Return to original position if placement is invalid
         piece.x = piece.originalPosition.x;
         piece.y = piece.originalPosition.y;
+        if(this.soundEffectsEnabled){
+        this.invalidSound.play(); // Play invalid placement sound
+        }
+        
       }
     } else {
       // Return to original position if placement is out of bounds
       piece.x = piece.originalPosition.x;
       piece.y = piece.originalPosition.y;
+      if(this.soundEffectsEnabled){
+      this.invalidSound.play(); // Play invalid placement sound
+      }
     }
-    
+
     if (!this.hasValidMoves()) {
+      this.gameoverSound.play(); // Play game over sound
       this.endGame();
     }
   }
@@ -287,6 +326,7 @@ this.scoreText.setDepth(10);  // Ensure the score text is on top
     // Update score
     this.score += (rowsToClear.length + colsToClear.length) * 10;
     this.scoreText.setText(this.score);
+    this.updateGoalProgress('lines', rowsToClear.length + colsToClear.length);
     if (this.score > this.highScore) {
       this.highScore = this.score;
       localStorage.setItem('highScore', this.highScore);
@@ -294,6 +334,9 @@ this.scoreText.setDepth(10);  // Ensure the score text is on top
   }
 
   clearLine(index, type) {
+    if(this.soundEffectsEnabled){
+    this.completeSound.play(); // Play placement sound
+    }
     if (type === 'row') {
       for (let col = 0; col < this.gridSize.cols; col++) {
         this.grid[index][col] = 0;
@@ -331,118 +374,197 @@ this.scoreText.setDepth(10);  // Ensure the score text is on top
 
   createButtons() {
     const { width, height } = this.scale;
-  
+
     // Create restart button
-    let restartButton = this.add.image(width / 2 - 150, height * 0.85, 'button').setInteractive();
-    restartButton.setDisplaySize(150, 50);
-    this.add.text(width / 2 - 150, height * 0.85, 'Restart', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-  
+    let restartButton = this.add.image(width / 2 - 175, height * 0.9, 'button').setInteractive();
+    restartButton.setDisplaySize(175, 75);
+    this.add.text(width / 2 - 175, height * 0.9, 'Restart', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+
     // Create settings button
-    let settingsButton = this.add.image(width / 2 + 150, height * 0.85, 'button').setInteractive();
-    settingsButton.setDisplaySize(150, 50);
-    this.add.text(width / 2 + 150, height * 0.85, 'Settings', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-  
+    let settingsButton = this.add.image(width / 2 + 175, height * 0.9, 'button').setInteractive();
+    settingsButton.setDisplaySize(175, 75);
+    this.add.text(width / 2 + 175, height * 0.9, 'Settings', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+
     // Restart button event
     restartButton.on('pointerdown', () => {
+      if(this.soundEffectsEnabled){
+      this.clickSound.play(); // Play click sound
+      }
       this.startNewGame();
     });
-  
+
     // Settings button event
     settingsButton.on('pointerdown', () => {
+      if(this.soundEffectsEnabled){
+        this.clickSound.play(); // Play click sound
+        }
       this.toggleSettingsMenu();
     });
-  
+
     // Create settings menu
     this.createSettingsMenu();
   }
-  
+
   createSettingsMenu() {
     const { width, height } = this.scale;
-  
+
     // Settings container
     this.settingsContainer = this.add.container(width / 2, height / 2).setVisible(false);
     this.settingsContainer.setDepth(30); // Ensure the settings menu is on top
-  
+
     // Background for settings
     let settingsBackground = this.add.rectangle(0, 0, width * 0.6, height * 0.6, 0x000000, 0.8);
     this.settingsContainer.add(settingsBackground);
-  
+
     // High score text
     this.highScore = localStorage.getItem('highScore') || 0;
     let highScoreText = this.add.text(0, -height * 0.2, `High Score: ${this.highScore}`, { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
     this.settingsContainer.add(highScoreText);
-  
+
+    // Create the goal display
+   
+    this.settingsContainer.add(this.goalText);
+
+    
+
     // Sound effects checkbox
-    let soundCheckbox = this.add.text(0, -50, 'Sound Effects', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-    let soundCheckboxBox = this.add.rectangle(0, -50, 20, 20, 0xffffff).setInteractive();
+    let soundCheckbox = this.add.text(0, 60, 'Sound Effects', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+    let soundCheckboxBox = this.add.rectangle(-150, 60, 20, 20, this.soundEffectsEnabled ? 0x00ff00 : 0xffffff).setInteractive();
     this.settingsContainer.add(soundCheckbox);
     this.settingsContainer.add(soundCheckboxBox);
-  
+
     // Music checkbox
-    let musicCheckbox = this.add.text(0, 50, 'Music', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
-    let musicCheckboxBox = this.add.rectangle(0, 50, 20, 20, 0xffffff).setInteractive();
+    let musicCheckbox = this.add.text(0, 130, 'Music', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5);
+    let musicCheckboxBox = this.add.rectangle(-150, 130, 20, 20, 0xffffff).setInteractive();
     this.settingsContainer.add(musicCheckbox);
     this.settingsContainer.add(musicCheckboxBox);
-  
+
     // Close button
     let closeButton = this.add.text(0, height * 0.2, 'Close', { fontSize: '32px', color: '#ffffff' }).setOrigin(0.5).setInteractive();
     this.settingsContainer.add(closeButton);
-  
+
     // Close button event
     closeButton.on('pointerdown', () => {
+      if(this.soundEffectsEnabled){
+        this.clickSound.play(); // Play click sound
+        }
       this.toggleSettingsMenu();
     });
-  
+
     // Checkbox events
     soundCheckboxBox.on('pointerdown', () => {
-      this.toggleCheckbox(soundCheckboxBox);
+      if(this.soundEffectsEnabled){
+        this.clickSound.play(); // Play click sound
+        }
+      this.toggleCheckbox(soundCheckboxBox, 'sound');
     });
-  
+
     musicCheckboxBox.on('pointerdown', () => {
-      this.toggleCheckbox(musicCheckboxBox);
+      if(this.soundEffectsEnabled){
+        this.clickSound.play(); // Play click sound
+        }
+      this.toggleCheckbox(musicCheckboxBox, 'music');
     });
   }
-  
+
   toggleSettingsMenu() {
-    if (!this.settingsContainer.visible){
-    this.createSettingsMenu(); // Recreate the settings menu to ensure it's on top
+    if (!this.settingsContainer.visible) {
+      this.createSettingsMenu(); // Recreate the settings menu to ensure it's on top
     }
     this.settingsContainer.setVisible(!this.settingsContainer.visible);
-    }
-  
-  toggleCheckbox(checkbox) {
+  }
+
+  toggleCheckbox(checkbox, type) {
     if (checkbox.fillColor === 0xffffff) {
       checkbox.setFillStyle(0x00ff00);
+      if(type === 'sound'){
+        this.soundEffectsEnabled = true;
+      }
     } else {
       checkbox.setFillStyle(0xffffff);
+      if(type === "sound"){
+        this.soundEffectsEnabled = false;
+      }
     }
+    this.saveGameState();
   }
-  
 
-startNewGame() {
-  // Clear any saved game state
-  localStorage.removeItem('gameState');
+  updateGoalText() {
+    let goalTextContent = 'Goals:\n';
+    this.goals.forEach(goal => {
+      goalTextContent += `${goal.description}: ${goal.progress}/${goal.target}\n`;
+    });
+    this.goalText.setText(goalTextContent);
+  }
 
-  // Reset the game state
-  this.score = 0;
-  this.scoreText.setText(this.score);
+  updateGoalProgress(type, value) {
+    this.goals.forEach(goal => {
+      if ((type === 'score' && goal.description.includes('points')) ||
+          (type === 'lines' && goal.description.includes('lines')) ||
+          (type === 'pieces' && goal.description.includes('pieces'))) {
+        goal.progress += value;
+        if (goal.progress >= goal.target) {
+          goal.progress = goal.target; // Cap the progress at the target
+          // Here you can add additional actions for goal completion
+          console.log(`Goal achieved: ${goal.description}`);
+        }
+      }
+    });
+    this.updateGoalText();
+  }
 
-  // Recreate the grid
-  this.grid = this.createGrid(this.gridSize.rows, this.gridSize.cols);
-  this.redrawGrid();
 
-  // Generate new pieces
-  this.pieces.forEach(piece => piece.destroy()); // Destroy existing pieces
-  this.pieces = this.generatePieces();
-  this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY);
-}
 
-  
+  startNewGame() {
+    // Clear any saved game state
+    localStorage.removeItem('gameState');
+
+    // Reset the game state
+    this.score = 0;
+    this.scoreText.setText(this.score);
+
+    // Reset goals
+    this.goals.forEach(goal => goal.progress = 0);
+    this.updateGoalText();
+
+    // Recreate the grid
+    this.grid = this.createGrid(this.gridSize.rows, this.gridSize.cols);
+    this.redrawGrid();
+
+    // Generate new pieces
+    this.pieces.forEach(piece => piece.destroy()); // Destroy existing pieces
+    this.pieces = this.generatePieces();
+    this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY);
+
+    // Reattach drag events
+    this.input.on('dragstart', (pointer, gameObject) => {
+        gameObject.setScale(1); // Scale up the piece when dragging starts
+        gameObject.setDepth(2); // Bring the piece to the top when dragging starts
+        gameObject.y -= this.cellSize * 4; // Offset the piece to match the cursor position
+    });
+
+    this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+        gameObject.x = dragX;
+        gameObject.y = dragY - this.cellSize * 4; // Offset the piece to match the cursor position
+        gameObject.alpha = 0.5;
+    });
+
+    this.input.on('dragend', (pointer, gameObject) => {
+        gameObject.setScale(0.5); // Scale down the piece after dragging ends
+        gameObject.alpha = 1;
+        this.placePiece(gameObject.x, gameObject.y, gameObject);
+        if (!this.hasValidMoves()) {
+            this.endGame();
+        }
+    });
+  }
+
   saveGameState() {
     const gameState = {
       grid: this.grid,
       pieces: this.pieces.map(piece => piece.shape),
-      score: this.score
+      score: this.score,
+      goals: this.goals
     };
     localStorage.setItem('gameState', JSON.stringify(gameState));
   }
@@ -454,19 +576,19 @@ startNewGame() {
       this.grid = gameState.grid;
       this.score = gameState.score;
       this.scoreText.setText(this.score);
-  
+      this.goals = gameState.goals || this.goals;
+      this.updateGoalText();
+
       // Recreate pieces from saved shapes
       this.pieces = gameState.pieces.map((shape, index) => this.createPiece(shape, index));
       this.drawPieces(this.pieces, this.initialPieceX, this.initialPieceY);
-  
+
       // Redraw the grid with the saved state
       this.redrawGrid();
       return true;
     }
     return false;
   }
-  
-  
 }
 
 export default GameScene;
