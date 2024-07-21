@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-    
-      
 <head>
-   
   <meta charset="UTF-8">
-    <title>TiBlocks</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <script src="phaser.min.js"></script>
-    <script type="module" src="main.js?v=2.0.5"></script>
-    <link rel="apple-touch-icon" href="assets/tblockIcon152ios.png">
-    <link rel="icon" type="image/png" href="assets/favicon.png">
-    <style>
-      
-        @font-face {
-          font-family: 'ArialBold';
-          src: local('Arial'), local('ArialBold'), url('path/to/arialbold.ttf') format('truetype');
-          font-weight: bold;
-        }
-      
-        .bold-text {
-          font-family: 'ArialBold';
-          font-size: 64px;
-          color: #007bff;
-        }
-     
-        body {
-            margin: 0;
-        }
-        canvas {
-            display: block;
-        }
-    </style>
+  <title>TiBlocks</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <script src="phaser.min.js"></script>
+  <script type="module" src="main.js?v=2.1.0"></script>
+  <link rel="apple-touch-icon" href="assets/tblockIcon152ios.png">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <style>
+    @font-face {
+      font-family: 'ArialBold';
+      src: local('Arial'), local('ArialBold'), url('path/to/arialbold.ttf') format('truetype');
+      font-weight: bold;
+    }
+    .bold-text {
+      font-family: 'ArialBold';
+      font-size: 64px;
+      color: #007bff;
+    }
+    body {
+      margin: 0;
+    }
+    canvas {
+      display: block;
+    }
+    .install-popup, .update-popup {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      text-align: center;
+    }
+    .install-popup button, .update-popup button {
+      margin: 5px;
+      padding: 5px 10px;
+    }
+  </style>
 </head>
 <body>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-      .then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch((error) => {
-        console.log('Service Worker registration failed:', error);
-      });
-    }
-  </script>
 </body>
 </html>
