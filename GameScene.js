@@ -242,7 +242,7 @@ class GameScene extends Phaser.Scene {
         this.scoreText.setText(this.score);
 
         // Track progress towards goals
-        this.updateGoalProgress('score', this.score);
+        this.updateGoalProgress('score', occupiedBlocks);
         this.updateGoalProgress('pieces', 1);
 
 
@@ -327,6 +327,7 @@ class GameScene extends Phaser.Scene {
     this.score += (rowsToClear.length + colsToClear.length) * 10;
     this.scoreText.setText(this.score);
     this.updateGoalProgress('lines', rowsToClear.length + colsToClear.length);
+    this.updateGoalProgress('score', (rowsToClear.length + colsToClear.length) * 10);
     if (this.score > this.highScore) {
       this.highScore = this.score;
       localStorage.setItem('highScore', this.highScore);
