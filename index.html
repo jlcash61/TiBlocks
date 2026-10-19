@@ -1,49 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>TiBlocks</title>
-  
-  <link rel="manifest" href="manifest.json">
-  <script src="phaser.min.js"></script>
-  <script type="module" src="main.js"></script>
-  <link rel="apple-touch-icon" href="assets/tblockIcon152ios.png">
-  <link rel="icon" type="image/png" href="assets/favicon.png">
-  <style>
-    @font-face {
-      font-family: 'ArialBold';
-      src: local('Arial'), local('ArialBold'), url('path/to/arialbold.ttf') format('truetype');
-      font-weight: bold;
-    }
-    .bold-text {
-      font-family: 'ArialBold';
-      font-size: 64px;
-      color: #007bff;
-    }
-    body {
-      margin: 0;
-    }
-    canvas {
-      display: block;
-    }
-    .install-popup, .update-popup {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      text-align: center;
-    }
-    .install-popup button, .update-popup button {
-      margin: 5px;
-      padding: 5px 10px;
-    }
-  </style>
-</head>
-<body>
-</body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#11171b"><meta name="description" content="TiBlocks reborn. Find your flow in an offline block puzzle."><link rel="manifest" href="manifest.json"><link rel="icon" href="assets/favicon.png"><link rel="apple-touch-icon" href="assets/tblockIcon192.png"><link rel="stylesheet" href="style.css"><title>TiBlocks — Find your flow</title></head><body>
+<header><a class="brand" href="./"><span class="brand-icon">▦</span> TiBlocks<span class="edition">REBORN</span></a><div class="header-actions"><span class="local-label">OFFLINE READY · NO ACCOUNT</span><button id="install" hidden>Install ↗</button><button id="settings" aria-label="Open settings">⚙</button></div></header>
+<main><aside class="intro"><div class="eyebrow">SMALL BLOCKS. BIG POSSIBILITIES.</div><h1>Make room<br>for your<br><em>next move.</em></h1><p>A little strategy. A lot of satisfaction.<br>Place shapes. Clear lines. Find your flow.</p><div class="mode-list" role="group" aria-label="Game mode"><button data-mode="classic" class="mode active"><span>01</span><div><strong>Classic</strong><small>Your pace. Your next best.</small></div><b>↗</b></button><button data-mode="daily" class="mode"><span>02</span><div><strong>Daily circuit</strong><small>A fresh seed. One shared puzzle.</small></div><b>↗</b></button><button data-mode="rush" class="mode"><span>03</span><div><strong>Rush</strong><small>Two minutes. Make them count.</small></div><b>↗</b></button></div><div class="original"><span>19</span><p>Original shapes.<br>A whole new energy.</p></div></aside>
+<section class="play" aria-label="TiBlocks game"><div class="game-top"><div><div class="eyebrow" id="mode-label">CLASSIC / ENDLESS POSSIBILITIES</div><div class="score" id="score">0</div></div><div class="best"><span>PERSONAL BEST</span><strong id="best">0</strong><small id="timer">TAKE YOUR TIME</small></div></div><div class="board-wrap"><div id="board" role="grid" aria-label="10 by 10 puzzle board"></div><div id="callout" aria-live="polite"></div><div id="end" hidden><span class="eyebrow">EVERY END IS A NEW BEGINNING</span><h2>Nice run.</h2><p id="end-score"></p><button id="again" class="primary">Play again ↗</button></div></div><div class="tray-label"><span>YOUR NEXT MOVES</span><span id="combo">MAKE SOME SPACE</span></div><div id="tray" aria-label="Available shapes"></div><div class="game-bottom"><span id="hint">Drag a shape, or select one and tap the board.</span><button id="restart" aria-label="Start a new game">↻ <span>New run</span></button></div></section>
+<aside class="details"><div class="status"><i></i> IN THE ZONE</div><h3>Good things<br>line up.</h3><p>Fill a row or column to clear it. Clear several at once for a bigger payoff.</p><div class="session"><div><span>LINES CLEARED</span><strong id="lines">00</strong></div><div><span>SHAPES PLACED</span><strong id="moves">00</strong></div><div><span>BEST COMBO</span><strong id="max-combo">×0</strong></div></div><div class="goal"><div class="eyebrow">LITTLE WINS</div><strong id="goal-title">First light</strong><p id="goal-text">Clear 5 lines in one run.</p><progress id="progress" max="5" value="0"></progress></div><div class="tip"><span>↳ A LITTLE TIP</span><p>Keep room for the big shapes. Future you will thank you.</p></div></aside></main><footer><span>BUILT FOR A MOMENT OF FLOW.</span><span>TiBlocks / REBORN <b>✦</b></span><span>19 SHAPES. ENDLESS POSSIBILITIES.</span></footer>
+<dialog id="dialog"><form method="dialog"><button class="close" aria-label="Close settings">✕</button><div class="eyebrow">YOUR KIND OF FLOW</div><h2>Make it yours.</h2><label>Sound effects <input id="sound" type="checkbox"></label><label>Haptic feedback <input id="haptic" type="checkbox"></label><label>Reduced motion <input id="motion" type="checkbox"></label><p>Your run saves automatically on this device. Daily uses the same piece sequence for each date. Rush pauses while the app is hidden.</p><button class="primary">Back to the board</button></form></dialog><div id="ghost" hidden></div><div id="toast" role="status"></div><script type="module" src="app.js"></script></body></html>
